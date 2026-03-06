@@ -15,6 +15,12 @@ This is a Vibe Coded Weight Loss Tracker App
 - Gives you a browser dashboard, daily entry page, weekly check-in page, and profile editor
 - Runs on port **1055** (LOSS)
 
+## Download it
+
+```bash
+git clone https://github.com/SixtyAteWhiskey/weighty
+```
+
 ## Run it
 
 ```bash
