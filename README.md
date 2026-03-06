@@ -1,6 +1,6 @@
-# Weight Loss Tracker Docker App
+# Weighty
 
-This is a Flask-based Docker app built from your Excel workbook structure.
+This is a Vibe Coded Weight Loss Tracker App
 
 ## What it does
 
@@ -16,8 +16,6 @@ This is a Flask-based Docker app built from your Excel workbook structure.
 - Runs on port **1055**
 
 ## Run it
-
-Put your `Weight Loss Trajectory.xlsx` file in the project root next to `docker-compose.yml`, then run:
 
 ```bash
 docker compose up -d --build
@@ -42,13 +40,4 @@ http://localhost:1055
 - **BMR** = `4.38*weight + 14.55*height - 5.08*age + 260`
 - **TDEE** = `BMR * activity_multiplier`
 - **Estimated fat loss** = `weekly_deficit / 3500`
-
-## Quick tweaks you may want next
-
-- goal weight and projected finish date
-- editable activity level preference
-- auth/login
-- CSV export
-- better 1:1 workbook tab recreation
-- backups
 
