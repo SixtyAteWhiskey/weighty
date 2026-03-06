@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid grid-2">
+  <div class="card">
+    <h2>Weekly Check-In</h2>
+    <form method="post">
+      <label>Week Start
+        <input type="date" name="week_start" required value="{{ suggested_week_start }}">
+      </label>
+      <label>Actual Weight (lbs)
+        <input type="number" step="0.1" name="actual_weight" placeholder="231.6">
+      </label>
+      <label>Total Weekly Calories
+        <input type="number" name="weekly_calories" placeholder="14700">
+      </label>
+      <label>Note
+        <textarea name="note" rows="4" placeholder="Refeed day, travel week, felt like death after leg day..."></textarea>
+      </label>
+      <div>
+        <button type="submit">Save Weekly Entry</button>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+      <div>
+        <h2>Clear Weekly Data</h2>
+        <div class="muted">This wipes every weekly check-in.</div>
+      </div>
+      <form method="post" action="{{ url_for('clear_data') }}" onsubmit="return confirm('Clear all weekly entries?');">
+        <input type="hidden" name="scope" value="weekly">
+        <input type="hidden" name="next" value="{{ url_for('weekly_view') }}">
+        <button type="submit" class="button-danger">Clear Weekly Entries</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <h2>Saved Weekly Entries</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Week Start</th><th>Actual Weight</th><th>Weekly Calories</th><th>Note</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row['week_start'] }}</td>
+          <td>{{ '%.1f lbs'|format(row['actual_weight']) if row['actual_weight'] is not none else '—' }}</td>
+          <td>{{ row['weekly_calories'] if row['weekly_calories'] is not none else '—' }}</td>
+          <td>{{ row['note'] if row['note'] else '—' }}</td>
+          <td>
+            <form method="post" action="{{ url_for('delete_weekly_entry', entry_id=row['id']) }}" onsubmit="return confirm('Delete this weekly entry?');">
+              <button type="submit" class="button-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted">No weekly entries yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

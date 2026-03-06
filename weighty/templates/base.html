@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Weight Loss Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;"SixtyAteWhiskey/SixtyLosesWhiskey"
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-2: #38bdf8;
+      --danger: #ef4444;
+      --danger-2: #dc2626;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+      color: var(--text);
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+    .nav {
+      display: flex; gap: 12px; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .brand { font-size: 1.35rem; font-weight: 800; }
+    .nav-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .nav-links a {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border); padding: 10px 14px;
+      border-radius: 14px; color: var(--text);
+    }
+    .grid { display: grid; gap: 18px; }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      background: rgba(17,24,39,0.92);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .kpi-label { color: var(--muted); font-size: 0.9rem; }
+    .kpi-value { font-size: 2rem; font-weight: 800; margin-top: 8px; }
+    .kpi-sub { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+    h1, h2, h3 { margin-top: 0; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.92rem;
+    }
+    th, td {
+      padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.07); text-align: left; vertical-align: top;
+    }
+    th { color: #cbd5e1; font-weight: 700; position: sticky; top: 0; background: #111827; }
+    .table-wrap { overflow: auto; max-height: 540px; }
+    form { display: grid; gap: 14px; }
+    .inline-form { display: inline-flex; gap: 8px; align-items: center; }
+    .form-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    label { display: grid; gap: 8px; color: var(--muted); font-size: 0.92rem; }
+    input, textarea, select, button {
+      font: inherit; border-radius: 14px; border: 1px solid var(--border); padding: 12px 14px;
+    }
+    input, textarea, select { background: rgba(255,255,255,0.04); color: var(--text); }
+    button {
+      background: linear-gradient(135deg, var(--accent), #16a34a);
+      color: white; border: none; cursor: pointer; font-weight: 700;
+    }
+    .button-secondary {
+      background: linear-gradient(135deg, var(--accent-2), #2563eb);
+    }
+    .button-danger {
+      background: linear-gradient(135deg, var(--danger), var(--danger-2));
+    }
+    .flash { margin-bottom: 16px; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); padding: 12px 14px; border-radius: 14px; }
+    .muted { color: var(--muted); }
+    .pill {
+      display: inline-block; font-size: 0.78rem; padding: 6px 10px; border-radius: 999px;
+      background: rgba(56,189,248,0.12); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.2);
+    }
+    .danger { color: #fca5a5; }
+    .success { color: #86efac; }
+    .button-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    @media (max-width: 1024px) {
+      .grid-4, .grid-3, .grid-2, .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <div>
+        <div class="brand">Weighty</div>
+        <div class="muted">Dockerized weight loss tracker.</div>
+      </div>
+      <div class="nav-links">
+        <a href="{{ url_for('index') }}">Dashboard</a>
+        <a href="{{ url_for('profile_view') }}">Profile</a>
+        <a href="{{ url_for('daily_view') }}">Daily</a>
+        <a href="{{ url_for('weekly_view') }}">Weekly</a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

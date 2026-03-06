@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Profile Settings</h2>
+  <div class="muted" style="margin-bottom:16px;">These values drive the same core math your spreadsheet uses.</div>
+  <form method="post">
+    <div class="form-grid">
+      <label>Age
+        <input type="number" name="age" required value="{{ profile.age }}">
+      </label>
+      <label>Start Date
+        <input type="date" name="start_date" required value="{{ profile.start_date }}">
+      </label>
+      <label>Start Weight (lbs)
+        <input type="number" step="0.1" name="start_weight" required value="{{ profile.start_weight }}">
+      </label>
+      <label>Height (inches)
+        <input type="number" step="0.1" name="height_inches" required value="{{ profile.height_inches }}">
+      </label>
+      <label>Calorie Goal
+        <input type="number" name="calorie_goal" required value="{{ profile.calorie_goal }}">
+      </label>
+      <label>Activity Level
+        <select name="activity_level" required>
+          {% for level in activity_multipliers.keys() %}
+            <option value="{{ level }}" {% if profile.activity_level == level %}selected{% endif %}>{{ level }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div>
+      <button type="submit">Save Profile</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

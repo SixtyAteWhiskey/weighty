@@ -1,0 +1,12 @@
+services:
+  weight-loss-tracker:
+    build: .
+    container_name: weight-loss-tracker
+    ports:
+      - "1055:1055"
+    volumes:
+      - ./data:/app/data
+      - ./Weight Loss Trajectory.xlsx:/app/Weight Loss Trajectory.xlsx:ro
+    environment:
+      SECRET_KEY: change-me
+    restart: unless-stopped

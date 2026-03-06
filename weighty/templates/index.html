@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="grid grid-4">
+  <div class="card">
+    <div class="kpi-label">Current Weight</div>
+    <div class="kpi-value">{{ '%.1f'|format(current_weight) }} lbs</div>
+    <div class="kpi-sub">Start: {{ '%.1f'|format(profile.start_weight) }} lbs</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Current BMI</div>
+    <div class="kpi-value">{{ '%.1f'|format(current_bmi) if current_bmi is not none else '—' }}</div>
+    <div class="kpi-sub">Height: {{ '%.0f'|format(profile.height_inches) }} in</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Estimated BMR</div>
+    <div class="kpi-value">{{ '%.0f'|format(current_bmr) if current_bmr is not none else '—' }}</div>
+    <div class="kpi-sub">Based on latest recorded weight</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Average Daily Calories</div>
+    <div class="kpi-value">{{ '%.0f'|format(avg_daily_calories) if avg_daily_calories is not none else '—' }}</div>
+    <div class="kpi-sub">Goal: {{ profile.calorie_goal }} / day</div>
+  </div>
+</div>
+
+<div class="grid grid-3" style="margin-top:18px;">
+  <div class="card">
+    <div class="kpi-label">Selected Activity Level</div>
+    <div class="kpi-value" style="font-size:1.5rem;">{{ profile.activity_level }}</div>
+    <div class="kpi-sub">Editable in Profile settings</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Estimated TDEE</div>
+    <div class="kpi-value">{{ '%.0f'|format(selected_tdee) if selected_tdee is not none else '—' }}</div>
+    <div class="kpi-sub">Using your selected activity level</div>
+  </div>
+  <div class="card">
+    <div class="kpi-label">Estimated Weekly Loss</div>
+    <div class="kpi-value">{{ '%.2f'|format(estimated_weekly_loss) if estimated_weekly_loss is not none else '—' }}</div>
+    <div class="kpi-sub">From average intake vs selected TDEE</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px;">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <h2>Weight Trend</h2>
+      <span class="pill">Imported + manual entries</span>
+    </div>
+    <canvas id="weightChart" height="120"></canvas>
+  </div>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <h2>Calories Trend</h2>
+      <span class="pill">Daily entries</span>
+    </div>
+    <canvas id="calorieChart" height="120"></canvas>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px;">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div>
+        <h2>Workbook Controls</h2>
+        <div class="muted">Re-import the original Excel file if you mount it into <code>./data</code>.</div>
+      </div>
+      <form method="post" action="{{ url_for('import_excel_route') }}">
+        <button type="submit" class="button-secondary">Re-import Excel</button>
+      </form>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px;">
+      <div class="card" style="background:rgba(255,255,255,0.03)">
+        <div class="kpi-label">Profile</div>
+        <div class="kpi-sub">Age {{ profile.age }} · Start {{ profile.start_date }} · Goal {{ profile.calorie_goal }} cals</div>
+      </div>
+      <div class="card" style="background:rgba(255,255,255,0.03)">
+        <div class="kpi-label">TDEE Estimates</div>
+        {% for name, multiplier in activity_multipliers.items() %}
+          <div class="kpi-sub">{{ name }}: {{ '%.0f'|format(current_bmr * multiplier) if current_bmr is not none else '—' }}{% if name == profile.activity_level %} ← selected{% endif %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Data Controls</h2>
+    <div class="muted" style="margin-bottom:16px;">Big red buttons for when the tracker gets weird, messy, or you just want to start fresh.</div>
+    <div class="button-group">
+      <form method="post" action="{{ url_for('clear_data') }}" onsubmit="return confirm('Clear all daily entries?');">
+        <input type="hidden" name="scope" value="daily">
+        <input type="hidden" name="next" value="{{ url_for('index') }}">
+        <button type="submit" class="button-danger">Clear Daily Entries</button>
+      </form>
+      <form method="post" action="{{ url_for('clear_data') }}" onsubmit="return confirm('Clear all weekly entries?');">
+        <input type="hidden" name="scope" value="weekly">
+        <input type="hidden" name="next" value="{{ url_for('index') }}">
+        <button type="submit" class="button-danger">Clear Weekly Entries</button>
+      </form>
+      <form method="post" action="{{ url_for('clear_data') }}" onsubmit="return confirm('Clear all daily and weekly entries?');">
+        <input type="hidden" name="scope" value="all_entries">
+        <input type="hidden" name="next" value="{{ url_for('index') }}">
+        <button type="submit" class="button-danger">Clear All Entries</button>
+      </form>
+      <form method="post" action="{{ url_for('clear_data') }}" onsubmit="return confirm('Delete ALL tracker data and reset from defaults/workbook?');">
+        <input type="hidden" name="scope" value="all_data">
+        <button type="submit" class="button-danger">Reset All Data</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="margin-top:18px;">
+  <div class="card">
+    <h2>Recent Daily Entries</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Weight</th><th>Calories</th></tr>
+        </thead>
+        <tbody>
+          {% for row in daily_rows|reverse %}
+          <tr>
+            <td>{{ row['entry_date'] }}</td>
+            <td>{{ '%.1f lbs'|format(row['weight']) if row['weight'] is not none else '—' }}</td>
+            <td>{{ row['calories'] if row['calories'] is not none else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Activity-Level Impact</h2>
+    <div class="muted" style="margin-bottom:12px;">Your selected activity level affects the TDEE and loss math shown here and in the weekly projection table.</div>
+    <div class="kpi-sub">Estimated daily deficit: {{ '%.0f'|format(estimated_daily_deficit) if estimated_daily_deficit is not none else '—' }}</div>
+    <div class="kpi-sub">Estimated weekly loss: {{ '%.2f lbs'|format(estimated_weekly_loss) if estimated_weekly_loss is not none else '—' }}</div>
+    <div class="kpi-sub">Current calorie goal: {{ profile.calorie_goal }} / day</div>
+    <div class="kpi-sub">Set this under Profile when your training volume changes.</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:18px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <div>
+      <h2>Weekly Projection Table</h2>
+      <div class="muted">Mirrors the spirit of your workbook: expected weight, actual weight, BMR/TDEE, and fat-loss math.</div>
+    </div>
+    <span class="pill">26-week view</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Week Start</th>
+          <th>Expected Wt</th>
+          <th>Expected BMI</th>
+          <th>Actual Wt</th>
+          <th>Actual BMI</th>
+          <th>BMR</th>
+          <th>Sedentary</th>
+          <th>Light</th>
+          <th>Moderate</th>
+          <th>Intense</th>
+          <th>Weekly Calories</th>
+          <th>Selected Fat Loss</th>
+          <th>Fat Loss @ Moderate</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in projection %}
+        <tr>
+          <td>
+            {{ row.week_date }}
+            {% if row.is_current %}<div class="pill" style="margin-top:6px;">Current Week</div>{% endif %}
+          </td>
+          <td>{{ '%.1f'|format(row.expected_weight) }}</td>
+          <td>{{ '%.1f'|format(row.expected_bmi) if row.expected_bmi is not none else '—' }}</td>
+          <td>{{ '%.1f'|format(row.actual_weight) if row.actual_weight is not none else '—' }}</td>
+          <td>{{ '%.1f'|format(row.actual_bmi) if row.actual_bmi is not none else '—' }}</td>
+          <td>{{ '%.0f'|format(row.current_bmr) if row.current_bmr is not none else '—' }}</td>
+          <td>{{ '%.0f'|format(row.tdees['Sedentary']) if row.tdees['Sedentary'] is not none else '—' }}</td>
+          <td>{{ '%.0f'|format(row.tdees['Lightly Active']) if row.tdees['Lightly Active'] is not none else '—' }}</td>
+          <td>{{ '%.0f'|format(row.tdees['Moderately Active']) if row.tdees['Moderately Active'] is not none else '—' }}</td>
+          <td>{{ '%.0f'|format(row.tdees['Intensely Active']) if row.tdees['Intensely Active'] is not none else '—' }}</td>
+          <td>{{ row.weekly_cals if row.weekly_cals is not none else '—' }}</td>
+          <td>{{ '%.2f lbs'|format(row.selected_fat_loss) if row.selected_fat_loss is not none else '—' }}</td>
+          <td>{{ '%.2f lbs'|format(row.fat_loss['Moderately Active']) if row.fat_loss['Moderately Active'] is not none else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const textColor = '#e5e7eb';
+const gridColor = 'rgba(255,255,255,0.08)';
+
+new Chart(document.getElementById('weightChart'), {
+  type: 'line',
+  data: {
+    labels: {{ chart_labels|tojson }},
+    datasets: [{
+      label: 'Weight (lbs)',
+      data: {{ chart_weights|tojson }},
+      tension: 0.25,
+      borderWidth: 2,
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: textColor } } },
+    scales: {
+      x: { ticks: { color: textColor }, grid: { color: gridColor } },
+      y: { ticks: { color: textColor }, grid: { color: gridColor } }
+    }
+  }
+});
+
+new Chart(document.getElementById('calorieChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ chart_calorie_labels|tojson }},
+    datasets: [{
+      label: 'Calories',
+      data: {{ chart_calories|tojson }},
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: textColor } } },
+    scales: {
+      x: { ticks: { color: textColor }, grid: { color: gridColor } },
+      y: { ticks: { color: textColor }, grid: { color: gridColor } }
+    }
+  }
+});
+</script>
+{% endblock %}
