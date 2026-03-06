@@ -4,16 +4,16 @@ This is a Vibe Coded Weight Loss Tracker App
 
 ## What it does
 
-- Imports your starting profile from the workbook
-- Imports weekly weigh-ins and daily calorie/weight entries from the workbook
-- Recreates the core workbook math for:
+- Tracks your starting profile
+- Tracks weekly weigh-ins and daily calorie/weight entries 
+- Calculates the core workbook math for:
   - BMI
   - BMR
   - TDEE estimates
   - Weekly calorie deficit
   - Estimated fat loss based on a 3,500 calorie pound-of-fat rule
 - Gives you a browser dashboard, daily entry page, weekly check-in page, and profile editor
-- Runs on port **1055**
+- Runs on port **1055** (LOSS)
 
 ## Run it
 
