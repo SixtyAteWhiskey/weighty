@@ -3,7 +3,8 @@
 This is a Vibe Coded Weight Loss Tracker App
 
 
-<img width="2560" height="1282" alt="weighty" src="https://github.com/user-attachments/assets/01623988-c356-49aa-8e03-d157dbe28789" />
+<img width="2560" height="1282" alt="Screenshot 2026-03-05 at 22-58-33 Weight Loss Tracker" src="https://github.com/user-attachments/assets/6eeb15f0-b12d-46ae-bf6c-b74743d52522" />
+
 
 
 
